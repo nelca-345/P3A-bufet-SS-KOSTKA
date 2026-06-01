@@ -63,40 +63,37 @@ button:hover {
 }
 </style>
 </head>
-
 <body>
+
 <h1>SŠ Kostka – OBJEDNÁVKY BUFET</h1>
 
 <div class="container">
-
  <div id="items"></div>
 
  <div id="celkem">Celková cena: 0 Kč</div>
  <div id="pocet">Počet kusů: 0</div>
 
- <!-- ✅ NOVÁ POLE PRO UŽIVATELE -->
- <!-- ======================================= -->
- <input class="input-box" type="text" id="jmeno" 
+ <!-- ===================================================== -->
+ <!-- ✅ NOVĚ PŘIDANÁ POVINNÁ POLE (JMÉNO + TELEFON) -->
+ <!-- ===================================================== -->
+ <input class="input-box" type="text" id="jmeno"
  placeholder="VAŠE JMÉNO (Příjmení Jméno)" required>
 
- <input class="input-box" type="tel" id="telefon" 
+ <input class="input-box" type="tel" id="telefon"
  placeholder="TELEFON (+420 000 000 000)" required>
- <!-- ======================================= -->
+ <!-- ===================================================== -->
 
  <button onclick="odeslatObjednavku()">ODESLAT OBJEDNÁVKU</button>
-
 </div>
 
 <script>
 let items = [];
 
-// ✅ načítání CSV
+// ✅ načtení CSV
 async function loadCSV() {
  try {
  const response = await fetch("data_bufet.csv?t=" + Date.now());
- if (!response.ok) {
- throw new Error("Soubor nebyl nalezen");
- }
+ if (!response.ok) throw new Error("Soubor nenalezen");
  const text = await response.text();
  parseCSV(text);
  renderItems();
@@ -110,19 +107,15 @@ async function loadCSV() {
 function parseCSV(text) {
  items = [];
  const lines = text.split("\n");
-
  for (let i = 1; i < lines.length; i++) {
  const line = lines[i].trim();
  if (!line) continue;
-
  const [nazev, cena] = line.split(";");
- if (nazev && cena) {
  items.push({
  nazev: nazev.trim(),
- cena: parseFloat(cena.replace(",", ".")),
+ cena: parseFloat(cena),
  mnozstvi: 0
  });
- }
  }
 }
 
@@ -134,11 +127,13 @@ function renderItems() {
  items.forEach((item, index) => {
  const div = document.createElement("div");
  div.className = "item";
+
  div.innerHTML = `
  <span>${item.nazev} (${item.cena} Kč)</span>
  <input type="number" min="0" value="0"
  onchange="updateItem(${index}, this.value)">
  `;
+
  container.appendChild(div);
  });
 }
@@ -166,19 +161,19 @@ function updateSummary() {
  "Počet kusů: " + pocet;
 }
 
-// ✅ ODESLÁNÍ OBJEDNÁVKY + MAILTO
-// =======================================
+// =====================================================
+// ✅ FUNKCE PRO ODESLÁNÍ OBJEDNÁVKY + MAILTO
+// =====================================================
 function odeslatObjednavku() {
 
  const jmeno = document.getElementById("jmeno").value.trim();
  const telefon = document.getElementById("telefon").value.trim();
 
- // ✅ validace polí
+ // ✅ kontrola povinných polí
  if (!jmeno) {
  alert("Vyplň své jméno!");
  return;
  }
-
  if (!telefon) {
  alert("Vyplň telefon!");
  return;
@@ -205,21 +200,19 @@ function odeslatObjednavku() {
  text += "%0D%0A";
  text += `Celková cena: ${celkem.toFixed(2)} Kč%0D%0A`;
  text += `Počet kusů: ${pocet}%0D%0A%0D%0A`;
-
  text += `Jméno: ${jmeno}%0D%0A`;
  text += `Telefon: ${telefon}`;
 
- // ✅ MAILTO část (ODESLÁNÍ EMAILU)
- // =======================================
+ // =====================================================
+ // ✅ MAILTO – OTEVŘE E-MAILOVÉHO KLIENTA
+ // =====================================================
  window.location.href =
- "mailto:machalek.roman@kostka-skola.cz" +
+ "mailto:ptackova.nela@kostka-skola.cz" +
  "?subject=Objednávka bufet" +
  "&body=" + text;
- // =======================================
+ // =====================================================
 }
-// =======================================
 
-// start
 loadCSV();
 </script>
 
